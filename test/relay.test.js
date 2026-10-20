@@ -45,6 +45,12 @@ test("read-only: orders and money movement blocked, only login POSTs", async () 
   assert.equal((await relay.fetch(req("/ibkr/ndcdyn.interactivebrokers.com/AccountManagement/FlexWebService/SendRequest?t=1&q=2&v=3"), env)).status, 200);
 });
 
+test("Saxo sign-in step and data", async () => {
+  assert.equal((await relay.fetch(req("/saxo/live.logonvalidation.net/token", { method: "POST", body: "grant_type=authorization_code" }), env)).status, 200);
+  assert.equal((await relay.fetch(req("/saxo/gateway.saxobank.com/openapi/port/v1/balances/me"), env)).status, 200);
+  assert.equal((await relay.fetch(req("/saxo/gateway.saxobank.com/openapi/trade/v2/orders", { method: "POST", body: "{}" }), env)).status, 403);
+});
+
 test("browser preflight", async () => {
   const r = await relay.fetch(new Request("https://r.example/health", { method: "OPTIONS", headers: { Origin: ORIGIN } }), env);
   assert.equal(r.status, 204);

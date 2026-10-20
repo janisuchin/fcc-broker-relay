@@ -10,7 +10,7 @@
 //  - It stores nothing and logs nothing. Your broker API keys stay encrypted in the app on your phone; the relay never
 //    holds them.
 
-export const VERSION = "1.0.0";
+export const VERSION = "1.1.0";
 
 // broker id -> the API servers it may reach (https only)
 export const BROKERS = {
@@ -23,6 +23,7 @@ export const BROKERS = {
   kotak: ["mis.kotaksecurities.com", "gw-napi.kotaksecurities.com"],
   ibkr: ["ndcdyn.interactivebrokers.com", "gdcdyn.interactivebrokers.com"],
   etoro: ["public-api.etoro.com"],
+  saxo: ["live.logonvalidation.net", "gateway.saxobank.com"],
 };
 
 // anything that can trade or move money is refused, whatever the method
@@ -33,6 +34,7 @@ const LOGIN_POST = [
   /^\/v2\/login\/authorization\/token$/,                  // Upstox
   /^\/v2\/renewtoken$/i,                                  // Dhan
   /^\/breezeapi\/api\/v1\/customerdetails$/i,             // ICICI Breeze
+  /^\/token$/,                                           // Saxo (OAuth PKCE code exchange)
   /\/oauth\/token$/i, /\/login\b/i, /\/access-?token$/i, /\/getaccesstoken$/i,
 ];
 const HOP = ["host", "origin", "referer", "cookie", "x-relay-key", "cf-connecting-ip", "x-forwarded-for", "x-real-ip"];
