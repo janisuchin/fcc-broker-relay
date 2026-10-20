@@ -4,7 +4,7 @@ Some brokers (Zerodha, IBKR, Dhan, ICICI Direct …) do not let a web app on you
 directly. This tiny relay, running **in your own free Cloudflare account**, passes your app's requests on to your
 broker and the answers back. You own it; nobody else - not even the makers of the app - can see or use it.
 
-[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=RELAY_REPO_URL)
+[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/janisuchin/fcc-broker-relay) <!-- privacy-scan: ignore (owner approved publishing under this account, 2026-10-20) -->
 
 ## Is it safe?
 - **Read-only.** Placing, changing or cancelling orders and moving money are blocked inside the relay.
