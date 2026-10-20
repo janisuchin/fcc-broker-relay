@@ -1,0 +1,11 @@
+// Your personal broker relay for the Finance Command Center app. The free Cloudflare plan is enough.
+{
+  "name": "fcc-broker-relay",
+  "main": "src/index.js",
+  "compatibility_date": "2026-10-06",
+  "observability": { "enabled": false },
+  "vars": {
+    // the app allowed to use this relay (comma-separated for several)
+    "ALLOWED_ORIGIN": "https://finance-command-center.german-journey.workers.dev"
+  }
+}

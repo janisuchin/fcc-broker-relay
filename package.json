@@ -1,0 +1,22 @@
+{
+  "name": "fcc-broker-relay",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Personal, read-only broker relay for the Finance Command Center app. Runs in your own Cloudflare account; stores and logs nothing.",
+  "type": "module",
+  "scripts": {
+    "test": "node --test test/relay.test.js",
+    "deploy": "npx wrangler deploy"
+  },
+  "cloudflare": {
+    "bindings": {
+      "RELAY_KEY": {
+        "description": "Paste the **relay key** shown in the Finance Command Center app (Settings → Live broker connections → *Create relay key*). It makes sure only your app can use this relay."
+      },
+      "ALLOWED_ORIGIN": {
+        "description": "The address of the Finance Command Center app. Leave it as it is unless you use your own copy of the app."
+      }
+    }
+  },
+  "license": "MIT"
+}

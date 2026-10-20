@@ -1,0 +1,3 @@
+# Your relay key: paste the key the Finance Command Center app created for you
+# (Settings > Live broker connections > Create relay key). At least 16 characters.
+RELAY_KEY=
