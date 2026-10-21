@@ -65,6 +65,19 @@ test("Fyers and 5paisa", async () => {
   assert.equal((await relay.fetch(req("/fivepaisa/openapi.5paisa.com/VendorsAPI/Service1.svc/V1/PlaceOrderRequest", { method: "POST", body: "{}" }), env)).status, 403);
 });
 
+test("IIFL Capital, Alice Blue and mStock: sign-in and reads pass, orders do not", async () => {
+  assert.equal((await relay.fetch(req("/iifl/api.iiflcapital.com/v1/getusersession", { method: "POST", body: "{}" }), env)).status, 200);
+  assert.equal((await relay.fetch(req("/iifl/api.iiflcapital.com/v1/holdings"), env)).status, 200);
+  assert.equal((await relay.fetch(req("/iifl/api.iiflcapital.com/v1/orders", { method: "POST", body: "{}" }), env)).status, 403);
+  assert.equal((await relay.fetch(req("/aliceblue/a3.aliceblueonline.com/open-api/od/v1/vendor/getUserDetails", { method: "POST", body: "{}" }), env)).status, 200);
+  assert.equal((await relay.fetch(req("/aliceblue/a3.aliceblueonline.com/open-api/od/v1/limits/"), env)).status, 200);
+  assert.equal((await relay.fetch(req("/aliceblue/a3.aliceblueonline.com/open-api/od/v1/orders/placeorder", { method: "POST", body: "{}" }), env)).status, 403);
+  assert.equal((await relay.fetch(req("/mstock/api.mstock.trade/openapi/typea/session/verifytotp", { method: "POST", body: "api_key=x&totp=1" }), env)).status, 200);
+  assert.equal((await relay.fetch(req("/mstock/api.mstock.trade/openapi/typea/portfolio/holdings"), env)).status, 200);
+  assert.equal((await relay.fetch(req("/mstock/api.mstock.trade/openapi/typea/orders/regular", { method: "POST", body: "x" }), env)).status, 403);
+  assert.equal((await relay.fetch(req("/mstock/api.iiflcapital.com/v1/holdings"), env)).status, 403);
+});
+
 test("browser preflight", async () => {
   const r = await relay.fetch(new Request("https://r.example/health", { method: "OPTIONS", headers: { Origin: ORIGIN } }), env);
   assert.equal(r.status, 204);
