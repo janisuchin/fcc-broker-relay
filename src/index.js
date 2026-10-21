@@ -10,7 +10,7 @@
 //  - It stores nothing and logs nothing. Your broker API keys stay encrypted in the app on your phone; the relay never
 //    holds them.
 
-export const VERSION = "1.3.0";
+export const VERSION = "1.4.0";
 
 // broker id -> the API servers it may reach (https only). An entry starting with "." allows that broker's own
 // sub-domains only (Kotak Neo gives each user a data server like e21.kotaksecurities.com at sign-in).
@@ -30,6 +30,7 @@ export const BROKERS = {
   iifl: ["api.iiflcapital.com"],
   aliceblue: ["a3.aliceblueonline.com"],
   mstock: ["api.mstock.trade"],
+  rupeezy: ["vortex-api.rupeezy.in"],
 };
 
 export function hostAllowed(broker, host) {
@@ -52,6 +53,7 @@ const LOGIN_POST = [
   /^\/v1\/getusersession$/,                               // IIFL Capital (checksum exchange)
   /^\/open-api\/od\/v1\/vendor\/getUserDetails$/,         // Alice Blue (checksum exchange)
   /^\/openapi\/typea\/session\/verifytotp$/,              // mStock (TOTP sign-in)
+  /^\/v2\/user\/session$/,                                // Rupeezy (checksum exchange)
   /\/oauth\/token$/i, /\/login\b/i, /\/access-?token$/i, /\/getaccesstoken$/i,
   // read calls that these brokers define as POST (they return data, they cannot trade)
   /^\/VendorsAPI\/Service1\.svc\/V[234]\/(Holding|NetPositionNetWise|Margin)$/i,   // 5paisa

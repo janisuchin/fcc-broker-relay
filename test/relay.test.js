@@ -78,6 +78,12 @@ test("IIFL Capital, Alice Blue and mStock: sign-in and reads pass, orders do not
   assert.equal((await relay.fetch(req("/mstock/api.iiflcapital.com/v1/holdings"), env)).status, 403);
 });
 
+test("Rupeezy: sign-in, holdings and quotes pass, orders do not", async () => {
+  assert.equal((await relay.fetch(req("/rupeezy/vortex-api.rupeezy.in/v2/user/session", { method: "POST", body: "{}" }), env)).status, 200);
+  assert.equal((await relay.fetch(req("/rupeezy/vortex-api.rupeezy.in/v2/data/quotes?q=NSE%3AX&mode=ltp"), env)).status, 200);
+  assert.equal((await relay.fetch(req("/rupeezy/vortex-api.rupeezy.in/v2/trading/orders/regular", { method: "POST", body: "{}" }), env)).status, 403);
+});
+
 test("browser preflight", async () => {
   const r = await relay.fetch(new Request("https://r.example/health", { method: "OPTIONS", headers: { Origin: ORIGIN } }), env);
   assert.equal(r.status, 204);
