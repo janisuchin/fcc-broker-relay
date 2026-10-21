@@ -51,6 +51,20 @@ test("Saxo sign-in step and data", async () => {
   assert.equal((await relay.fetch(req("/saxo/gateway.saxobank.com/openapi/trade/v2/orders", { method: "POST", body: "{}" }), env)).status, 403);
 });
 
+test("Kotak per-user servers: only Kotak's own sub-domains", async () => {
+  assert.equal((await relay.fetch(req("/kotak/e21.kotaksecurities.com/portfolio/v1/holdings"), env)).status, 200);
+  assert.equal((await relay.fetch(req("/kotak/evilkotaksecurities.com/x"), env)).status, 403);
+  assert.equal((await relay.fetch(req("/kotak/kotaksecurities.com.evil.example/x"), env)).status, 403);
+  assert.equal((await relay.fetch(req("/kotak/e21.kotaksecurities.com/quick/user/limits", { method: "POST", body: "jData=x" }), env)).status, 200);
+});
+
+test("Fyers and 5paisa", async () => {
+  assert.equal((await relay.fetch(req("/fyers/api-t1.fyers.in/api/v3/validate-authcode", { method: "POST", body: "{}" }), env)).status, 200);
+  assert.equal((await relay.fetch(req("/fyers/api-t1.fyers.in/api/v3/holdings"), env)).status, 200);
+  assert.equal((await relay.fetch(req("/fivepaisa/openapi.5paisa.com/VendorsAPI/Service1.svc/V3/Holding", { method: "POST", body: "{}" }), env)).status, 200);
+  assert.equal((await relay.fetch(req("/fivepaisa/openapi.5paisa.com/VendorsAPI/Service1.svc/V1/PlaceOrderRequest", { method: "POST", body: "{}" }), env)).status, 403);
+});
+
 test("browser preflight", async () => {
   const r = await relay.fetch(new Request("https://r.example/health", { method: "OPTIONS", headers: { Origin: ORIGIN } }), env);
   assert.equal(r.status, 204);

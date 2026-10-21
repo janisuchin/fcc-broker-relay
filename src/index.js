@@ -10,9 +10,10 @@
 //  - It stores nothing and logs nothing. Your broker API keys stay encrypted in the app on your phone; the relay never
 //    holds them.
 
-export const VERSION = "1.1.0";
+export const VERSION = "1.2.0";
 
-// broker id -> the API servers it may reach (https only)
+// broker id -> the API servers it may reach (https only). An entry starting with "." allows that broker's own
+// sub-domains only (Kotak Neo gives each user a data server like e21.kotaksecurities.com at sign-in).
 export const BROKERS = {
   zerodha: ["api.kite.trade"],
   upstox: ["api.upstox.com"],
@@ -20,11 +21,20 @@ export const BROKERS = {
   icici: ["api.icicidirect.com"],
   hdfcsec: ["developer.hdfcsec.com"],
   "5paisa": ["openapi.5paisa.com"],
-  kotak: ["mis.kotaksecurities.com", "gw-napi.kotaksecurities.com"],
+  fivepaisa: ["openapi.5paisa.com"],
+  fyers: ["api-t1.fyers.in"],
+  kotak: ["mis.kotaksecurities.com", ".kotaksecurities.com"],
   ibkr: ["ndcdyn.interactivebrokers.com", "gdcdyn.interactivebrokers.com"],
   etoro: ["public-api.etoro.com"],
   saxo: ["live.logonvalidation.net", "gateway.saxobank.com"],
 };
+
+export function hostAllowed(broker, host) {
+  const list = BROKERS[broker];
+  if (!list || !/^[a-z0-9.-]+$/i.test(host || "")) return false;
+  const h = host.toLowerCase();
+  return list.some((e) => (e.startsWith(".") ? h.endsWith(e) && h.length > e.length : h === e));
+}
 
 // anything that can trade or move money is refused, whatever the method
 const WRITE_PATH = /(^|\/)(orders?|place[-_]?order|modify[-_]?order|cancel[-_]?order|gtt|basket|baskets|alerts?|sip|mf\/orders|mf\/sips|funds\/transfer|payout|withdraw|trade(?!book|s?\/?history))(\/|$|\?)/i;
@@ -35,7 +45,11 @@ const LOGIN_POST = [
   /^\/v2\/renewtoken$/i,                                  // Dhan
   /^\/breezeapi\/api\/v1\/customerdetails$/i,             // ICICI Breeze
   /^\/token$/,                                           // Saxo (OAuth PKCE code exchange)
+  /^\/api\/v3\/validate-authcode$/,                       // Fyers
   /\/oauth\/token$/i, /\/login\b/i, /\/access-?token$/i, /\/getaccesstoken$/i,
+  // read calls that these brokers define as POST (they return data, they cannot trade)
+  /^\/VendorsAPI\/Service1\.svc\/V[234]\/(Holding|NetPositionNetWise|Margin)$/i,   // 5paisa
+  /^\/quick\/user\/limits$/,                              // Kotak Neo funds
 ];
 const HOP = ["host", "origin", "referer", "cookie", "x-relay-key", "cf-connecting-ip", "x-forwarded-for", "x-real-ip"];
 
@@ -77,7 +91,7 @@ export default {
     const parts = url.pathname.split("/").filter(Boolean);
     const [broker, host, ...rest] = parts;
     if (!broker || !BROKERS[broker]) return json({ error: "unknown broker" }, 404, h);
-    if (!host || !BROKERS[broker].includes(host)) return json({ error: `this relay does not reach ${host || "that server"} for ${broker}` }, 403, h);
+    if (!host || !hostAllowed(broker, host)) return json({ error: `this relay does not reach ${host || "that server"} for ${broker}` }, 403, h);
     const path = "/" + rest.join("/");
     if (!["GET", "POST"].includes(request.method)) return json({ error: "read-only relay: only GET (and login POST) are allowed" }, 405, h);
     if (WRITE_PATH.test(path)) return json({ error: "read-only relay: trading and money-movement calls are blocked" }, 403, h);
