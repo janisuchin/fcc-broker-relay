@@ -10,7 +10,7 @@
 //  - It stores nothing and logs nothing. Your broker API keys stay encrypted in the app on your phone; the relay never
 //    holds them.
 
-export const VERSION = "1.6.0";
+export const VERSION = "1.7.0";
 
 // broker id -> the API servers it may reach (https only). An entry starting with "." allows that broker's own
 // sub-domains only (Kotak Neo gives each user a data server like e21.kotaksecurities.com at sign-in).
@@ -38,6 +38,7 @@ export const BROKERS = {
   trading212: ["live.trading212.com"],
   starling: ["api.starlingbank.com"],
   wise: ["api.wise.com"],
+  bunq: ["api.bunq.com"],
 };
 
 export function hostAllowed(broker, host) {
@@ -61,6 +62,7 @@ const LOGIN_POST = [
   /^\/open-api\/od\/v1\/vendor\/getUserDetails$/,         // Alice Blue (checksum exchange)
   /^\/openapi\/typea\/session\/verifytotp$/,              // mStock (TOTP sign-in)
   /^\/v2\/user\/session$/,                                // Rupeezy (checksum exchange)
+  /^\/v1\/(installation|device-server|session-server)$/,   // bunq (device registration + session - the body is forwarded byte for byte, so its signature holds)
   /^\/userapiauthservice\/personal\/access-tokens$/,        // Public.com (personal secret -> access token)
   /\/oauth\/token$/i, /\/login\b/i, /\/access-?token$/i, /\/getaccesstoken$/i,
   // read calls that these brokers define as POST (they return data, they cannot trade)

@@ -108,6 +108,16 @@ test("Europe: Trading 212, eToro, Starling, Wise - reads pass, orders and paymen
   assert.equal((await relay.fetch(req("/wise/api.wise.com/v1/transfers", { method: "POST", body: "{}" }), env)).status, 403);
 });
 
+test("bunq: the three registration calls and reads pass; payments do not", async () => {
+  assert.equal((await relay.fetch(req("/bunq/api.bunq.com/v1/installation", { method: "POST", body: "{}" }), env)).status, 200);
+  assert.equal((await relay.fetch(req("/bunq/api.bunq.com/v1/session-server", { method: "POST", body: "{}" }), env)).status, 200);
+  assert.equal((await relay.fetch(req("/bunq/api.bunq.com/v1/user/42/monetary-account?count=200"), env)).status, 200);
+  assert.equal((await relay.fetch(req("/bunq/api.bunq.com/v1/user/42/monetary-account/7/payment", { method: "POST", body: "{}" }), env)).status, 403);
+  const body = '{"secret":"x"}';
+  await relay.fetch(req("/bunq/api.bunq.com/v1/session-server", { method: "POST", body }), env);
+  assert.equal(new TextDecoder().decode(calls[calls.length - 1].init.body), body);         // byte for byte
+});
+
 test("browser preflight", async () => {
   const r = await relay.fetch(new Request("https://r.example/health", { method: "OPTIONS", headers: { Origin: ORIGIN } }), env);
   assert.equal(r.status, 204);
