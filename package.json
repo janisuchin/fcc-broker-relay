@@ -1,6 +1,6 @@
 {
   "name": "fcc-broker-relay",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "private": true,
   "description": "Personal, read-only broker relay for the Finance Command Center app. Runs in your own Cloudflare account; stores and logs nothing.",
   "type": "module",

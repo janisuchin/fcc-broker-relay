@@ -84,6 +84,20 @@ test("Rupeezy: sign-in, holdings and quotes pass, orders do not", async () => {
   assert.equal((await relay.fetch(req("/rupeezy/vortex-api.rupeezy.in/v2/trading/orders/regular", { method: "POST", body: "{}" }), env)).status, 403);
 });
 
+test("US brokers: Schwab, E*TRADE, Public, Webull - sign-in and reads pass, orders do not", async () => {
+  assert.equal((await relay.fetch(req("/schwab/api.schwabapi.com/v1/oauth/token", { method: "POST", body: "grant_type=x" }), env)).status, 200);
+  assert.equal((await relay.fetch(req("/schwab/api.schwabapi.com/trader/v1/accounts?fields=positions"), env)).status, 200);
+  assert.equal((await relay.fetch(req("/schwab/api.schwabapi.com/trader/v1/accounts/H1/orders", { method: "POST", body: "{}" }), env)).status, 403);
+  assert.equal((await relay.fetch(req("/etrade/api.etrade.com/oauth/request_token"), env)).status, 200);
+  assert.equal((await relay.fetch(req("/etrade/api.etrade.com/v1/accounts/K1/portfolio.json"), env)).status, 200);
+  assert.equal((await relay.fetch(req("/etrade/api.etrade.com/v1/accounts/K1/orders/place.json", { method: "POST", body: "{}" }), env)).status, 403);
+  assert.equal((await relay.fetch(req("/public/api.public.com/userapiauthservice/personal/access-tokens", { method: "POST", body: "{}" }), env)).status, 200);
+  assert.equal((await relay.fetch(req("/public/api.public.com/userapigateway/trading/A1/portfolio/v2"), env)).status, 200);
+  assert.equal((await relay.fetch(req("/public/api.public.com/userapigateway/trading/A1/order", { method: "POST", body: "{}" }), env)).status, 403);
+  assert.equal((await relay.fetch(req("/webull/api.webull.com/trading/accounts/list"), env)).status, 200);
+  assert.equal((await relay.fetch(req("/webull/api.webull.com/trade/place_order", { method: "POST", body: "{}" }), env)).status, 403);
+});
+
 test("browser preflight", async () => {
   const r = await relay.fetch(new Request("https://r.example/health", { method: "OPTIONS", headers: { Origin: ORIGIN } }), env);
   assert.equal(r.status, 204);

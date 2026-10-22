@@ -1,6 +1,6 @@
 # Your personal broker relay (Finance Command Center)
 
-Some brokers (Zerodha, IBKR, Dhan, Kotak Neo, IIFL Capital, Alice Blue …) do not let a web app on your phone talk to their servers
+Some brokers (Zerodha, IBKR, Dhan, Kotak Neo, IIFL Capital, Alice Blue, Charles Schwab, E*TRADE …) do not let a web app on your phone talk to their servers
 directly. This tiny relay, running **in your own free Cloudflare account**, passes your app's requests on to your
 broker and the answers back. You own it; nobody else - not even the makers of the app - can see or use it.
 
