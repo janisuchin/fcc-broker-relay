@@ -10,7 +10,7 @@
 //  - It stores nothing and logs nothing. Your broker API keys stay encrypted in the app on your phone; the relay never
 //    holds them.
 
-export const VERSION = "1.5.0";
+export const VERSION = "1.6.0";
 
 // broker id -> the API servers it may reach (https only). An entry starting with "." allows that broker's own
 // sub-domains only (Kotak Neo gives each user a data server like e21.kotaksecurities.com at sign-in).
@@ -35,6 +35,9 @@ export const BROKERS = {
   etrade: ["api.etrade.com"],
   public: ["api.public.com"],
   webull: ["api.webull.com"],
+  trading212: ["live.trading212.com"],
+  starling: ["api.starlingbank.com"],
+  wise: ["api.wise.com"],
 };
 
 export function hostAllowed(broker, host) {

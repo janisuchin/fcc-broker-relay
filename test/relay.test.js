@@ -98,6 +98,16 @@ test("US brokers: Schwab, E*TRADE, Public, Webull - sign-in and reads pass, orde
   assert.equal((await relay.fetch(req("/webull/api.webull.com/trade/place_order", { method: "POST", body: "{}" }), env)).status, 403);
 });
 
+test("Europe: Trading 212, eToro, Starling, Wise - reads pass, orders and payments do not", async () => {
+  assert.equal((await relay.fetch(req("/trading212/live.trading212.com/api/v0/equity/positions"), env)).status, 200);
+  assert.equal((await relay.fetch(req("/trading212/live.trading212.com/api/v0/equity/orders/market", { method: "POST", body: "{}" }), env)).status, 403);
+  assert.equal((await relay.fetch(req("/etoro/public-api.etoro.com/api/v1/trading/info/real/pnl"), env)).status, 200);
+  assert.equal((await relay.fetch(req("/starling/api.starlingbank.com/api/v2/accounts"), env)).status, 200);
+  assert.equal((await relay.fetch(req("/starling/api.starlingbank.com/api/v2/payments/local/account/A/category/C", { method: "POST", body: "{}" }), env)).status, 403);
+  assert.equal((await relay.fetch(req("/wise/api.wise.com/v4/profiles/1/balances?types=STANDARD"), env)).status, 200);
+  assert.equal((await relay.fetch(req("/wise/api.wise.com/v1/transfers", { method: "POST", body: "{}" }), env)).status, 403);
+});
+
 test("browser preflight", async () => {
   const r = await relay.fetch(new Request("https://r.example/health", { method: "OPTIONS", headers: { Origin: ORIGIN } }), env);
   assert.equal(r.status, 204);
