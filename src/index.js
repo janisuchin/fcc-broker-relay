@@ -10,7 +10,7 @@
 //  - It stores nothing and logs nothing. Your broker API keys stay encrypted in the app on your phone; the relay never
 //    holds them.
 
-export const VERSION = "1.8.0";
+export const VERSION = "1.9.0";
 
 // broker id -> the API servers it may reach (https only). An entry starting with "." allows that broker's own
 // sub-domains only (Kotak Neo gives each user a data server like e21.kotaksecurities.com at sign-in).
@@ -44,6 +44,10 @@ export const BROKERS = {
   coinbase: ["api.coinbase.com"],
   kraken: ["api.kraken.com"],
   kucoin: ["api.kucoin.com"],
+  // regional crypto exchanges (Africa, Latin America, Korea, India, Europe / Turkey)
+  luno: ["api.luno.com"], valr: ["api.valr.com"], bitso: ["api.bitso.com"], mercadobitcoin: ["api.mercadobitcoin.net"],
+  upbit: ["api.upbit.com"], wazirx: ["api.wazirx.com"], coindcx: ["api.coindcx.com"], coinswitch: ["coinswitch.co"],
+  bitvavo: ["api.bitvavo.com"], btcturk: ["api.btcturk.com"],
 };
 
 export function hostAllowed(broker, host) {
@@ -55,6 +59,8 @@ export function hostAllowed(broker, host) {
 
 // anything that can trade or move money is refused, whatever the method
 const WRITE_PATH = /(^|\/)(orders?|place[-_]?order|modify[-_]?order|cancel[-_]?order|gtt|basket|baskets|alerts?|sip|mf\/orders|mf\/sips|funds\/transfer|payout|withdraw|trade(?!book|s?\/?history))(\/|$|\?)/i;
+// read calls whose path happens to contain a blocked word (exact match only, GET only)
+const READ_ONLY_EXACT = [/^\/trade\/api\/v2\/user\/portfolio$/];   // CoinSwitch portfolio
 // the only POST calls allowed: logins / token exchanges (they create a session, they cannot trade)
 const LOGIN_POST = [
   /^\/session\/token$/,                                   // Zerodha
@@ -74,6 +80,8 @@ const LOGIN_POST = [
   /^\/VendorsAPI\/Service1\.svc\/V[234]\/(Holding|NetPositionNetWise|Margin)$/i,   // 5paisa
   /^\/quick\/user\/limits$/,                              // Kotak Neo funds
   /^\/0\/private\/(Balance|BalanceEx|TradeBalance)$/,       // Kraken balances (its read calls are POST; a key with "Query Funds" only)
+  /^\/exchange\/v1\/users\/balances$/,                  // CoinDCX balances (every authenticated call is POST)
+  /^\/oauth2\/token$/,                                   // Mercado Bitcoin (key id + secret -> access token)
 ];
 const HOP = ["host", "origin", "referer", "cookie", "x-relay-key", "cf-connecting-ip", "x-forwarded-for", "x-real-ip"];
 
@@ -118,7 +126,7 @@ export default {
     if (!host || !hostAllowed(broker, host)) return json({ error: `this relay does not reach ${host || "that server"} for ${broker}` }, 403, h);
     const path = "/" + rest.join("/");
     if (!["GET", "POST"].includes(request.method)) return json({ error: "read-only relay: only GET (and login POST) are allowed" }, 405, h);
-    if (WRITE_PATH.test(path)) return json({ error: "read-only relay: trading and money-movement calls are blocked" }, 403, h);
+    if (WRITE_PATH.test(path) && !READ_ONLY_EXACT.some((rx) => rx.test(path))) return json({ error: "read-only relay: trading and money-movement calls are blocked" }, 403, h);
     if (request.method === "POST" && !LOGIN_POST.some((rx) => rx.test(path))) return json({ error: "read-only relay: only login / token POST calls are allowed" }, 403, h);
 
     const headers = new Headers();

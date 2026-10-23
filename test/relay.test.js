@@ -135,3 +135,21 @@ test("crypto exchanges: balance reads pass; orders, withdrawals and other POSTs 
   assert.equal((await relay.fetch(req("/kucoin/api.kucoin.com/api/v1/accounts"), env)).status, 200);
   assert.equal((await relay.fetch(req("/kucoin/evil.example.com/api/v1/accounts"), env)).status, 403);
 });
+
+test("regional crypto exchanges: balance reads and the two allowed POSTs; nothing else", async () => {
+  for (const [b, path] of [["luno", "/luno/api.luno.com/api/1/balance"], ["valr", "/valr/api.valr.com/v1/account/balances"], ["bitso", "/bitso/api.bitso.com/v3/balance/"],
+    ["upbit", "/upbit/api.upbit.com/v1/accounts"], ["wazirx", "/wazirx/api.wazirx.com/sapi/v1/funds?timestamp=1&signature=x"], ["coinswitch", "/coinswitch/coinswitch.co/trade/api/v2/user/portfolio"],
+    ["bitvavo", "/bitvavo/api.bitvavo.com/v2/balance"], ["btcturk", "/btcturk/api.btcturk.com/api/v1/users/balances"], ["mercadobitcoin", "/mercadobitcoin/api.mercadobitcoin.net/api/v4/accounts"]])
+    assert.equal((await relay.fetch(req(path), env)).status, 200, b);
+  assert.equal((await relay.fetch(req("/coindcx/api.coindcx.com/exchange/v1/users/balances", { method: "POST", body: "{}" }), env)).status, 200);
+  assert.equal((await relay.fetch(req("/coindcx/api.coindcx.com/exchange/v1/orders/create", { method: "POST", body: "{}" }), env)).status, 403);
+  assert.equal((await relay.fetch(req("/mercadobitcoin/api.mercadobitcoin.net/oauth2/token", { method: "POST", body: "x" }), env)).status, 200);
+  assert.equal((await relay.fetch(req("/valr/api.valr.com/v1/orders/market", { method: "POST", body: "{}" }), env)).status, 403);
+  assert.equal((await relay.fetch(req("/luno/api.luno.com/api/1/send", { method: "POST", body: "x" }), env)).status, 403);
+});
+
+test("the CoinSwitch read exception is exact: its order calls stay blocked", async () => {
+  assert.equal((await relay.fetch(req("/coinswitch/coinswitch.co/trade/api/v2/order", { method: "POST", body: "{}" }), env)).status, 403);
+  assert.equal((await relay.fetch(req("/coinswitch/coinswitch.co/trade/api/v2/orders"), env)).status, 403);
+  assert.equal((await relay.fetch(req("/coinswitch/coinswitch.co/trade/api/v2/user/portfolio", { method: "POST", body: "{}" }), env)).status, 403);
+});
