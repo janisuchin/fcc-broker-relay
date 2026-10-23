@@ -122,3 +122,16 @@ test("browser preflight", async () => {
   const r = await relay.fetch(new Request("https://r.example/health", { method: "OPTIONS", headers: { Origin: ORIGIN } }), env);
   assert.equal(r.status, 204);
 });
+
+test("crypto exchanges: balance reads pass; orders, withdrawals and other POSTs do not", async () => {
+  assert.equal((await relay.fetch(req("/binance/api.binance.com/api/v3/account?timestamp=1&signature=x"), env)).status, 200);
+  assert.equal((await relay.fetch(req("/binance/api.binance.com/api/v3/order", { method: "POST", body: "x" }), env)).status, 403);
+  assert.equal((await relay.fetch(req("/binance/api.binance.com/sapi/v1/capital/withdraw/apply", { method: "POST", body: "x" }), env)).status, 403);
+  assert.equal((await relay.fetch(req("/coinbase/api.coinbase.com/api/v3/brokerage/accounts?limit=250"), env)).status, 200);
+  assert.equal((await relay.fetch(req("/coinbase/api.coinbase.com/api/v3/brokerage/orders", { method: "POST", body: "{}" }), env)).status, 403);
+  assert.equal((await relay.fetch(req("/kraken/api.kraken.com/0/private/Balance", { method: "POST", body: "nonce=1" }), env)).status, 200);
+  assert.equal((await relay.fetch(req("/kraken/api.kraken.com/0/private/AddOrder", { method: "POST", body: "nonce=1" }), env)).status, 403);
+  assert.equal((await relay.fetch(req("/kraken/api.kraken.com/0/private/Withdraw", { method: "POST", body: "nonce=1" }), env)).status, 403);
+  assert.equal((await relay.fetch(req("/kucoin/api.kucoin.com/api/v1/accounts"), env)).status, 200);
+  assert.equal((await relay.fetch(req("/kucoin/evil.example.com/api/v1/accounts"), env)).status, 403);
+});

@@ -10,7 +10,7 @@
 //  - It stores nothing and logs nothing. Your broker API keys stay encrypted in the app on your phone; the relay never
 //    holds them.
 
-export const VERSION = "1.7.0";
+export const VERSION = "1.8.0";
 
 // broker id -> the API servers it may reach (https only). An entry starting with "." allows that broker's own
 // sub-domains only (Kotak Neo gives each user a data server like e21.kotaksecurities.com at sign-in).
@@ -39,6 +39,11 @@ export const BROKERS = {
   starling: ["api.starlingbank.com"],
   wise: ["api.wise.com"],
   bunq: ["api.bunq.com"],
+  // crypto exchanges (read-only keys; their private calls send no CORS headers)
+  binance: ["api.binance.com", "api1.binance.com", "api2.binance.com", "api3.binance.com", "api4.binance.com"],
+  coinbase: ["api.coinbase.com"],
+  kraken: ["api.kraken.com"],
+  kucoin: ["api.kucoin.com"],
 };
 
 export function hostAllowed(broker, host) {
@@ -68,6 +73,7 @@ const LOGIN_POST = [
   // read calls that these brokers define as POST (they return data, they cannot trade)
   /^\/VendorsAPI\/Service1\.svc\/V[234]\/(Holding|NetPositionNetWise|Margin)$/i,   // 5paisa
   /^\/quick\/user\/limits$/,                              // Kotak Neo funds
+  /^\/0\/private\/(Balance|BalanceEx|TradeBalance)$/,       // Kraken balances (its read calls are POST; a key with "Query Funds" only)
 ];
 const HOP = ["host", "origin", "referer", "cookie", "x-relay-key", "cf-connecting-ip", "x-forwarded-for", "x-real-ip"];
 
